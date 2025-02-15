@@ -1,6 +1,6 @@
 import * as p from '@clack/prompts';
 
-async function handleApi() {
+async function handleApi(language: string, packageManager: string) {
   p.note('Setting up API Service...');
 }
 

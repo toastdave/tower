@@ -9,7 +9,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "format": "prettier --write \"src/**/*.{ts,tsx,json}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx,json}\"",
+    "go": "pnpm build && npm link"
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",
