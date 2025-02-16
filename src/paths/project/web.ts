@@ -1,4 +1,5 @@
 import * as p from '@clack/prompts';
+import { execa } from 'execa';
 
 export type Framework = {
   name: string;
@@ -122,10 +123,10 @@ const companionOptions: Record<string, Companion[]> = {
   ],
 };
 
-async function handleWebApp(
+export default async function handleWebApp(
   language: string,
   packageManager: string
-): Promise<{ framework: string; companion: string } | symbol> {
+): Promise<{ framework: string; companion: string; projectName: string } | symbol> {
   const framework = await p.select({
     message: 'What framework would you like to use?',
     options: frameworks.map((framework) => ({
@@ -154,12 +155,177 @@ async function handleWebApp(
     process.exit(0);
   }
 
-  p.note('Setting up Web Application...');
+  const projectName = await p.text({
+    message: 'What is the name of your project?',
+  });
 
-  return {
+  if (p.isCancel(projectName)) {
+    p.cancel('Operation cancelled');
+    process.exit(0);
+  }
+
+  const result = {
     framework: framework as string,
     companion: companion as string,
+    projectName: projectName as string,
   };
+
+  await createProject(result.projectName, result.framework, result.companion, packageManager);
+  return result;
 }
 
-export default handleWebApp;
+const createProject = async (
+  projectName: string,
+  framework: string,
+  companion: string,
+  packageManager: string
+) => {
+  p.note('Setting up Web Application...');
+
+  try {
+    switch (framework) {
+      case 'react':
+        if (companion === 'next') {
+          await execa(packageManager, ['create', 'next-app', projectName], { stdio: 'inherit' });
+        } else if (companion === 'vite') {
+          switch (packageManager) {
+            case 'bun':
+              await execa('bun', ['create', 'vite', projectName, '--template', 'react-ts'], {
+                stdio: 'inherit',
+              });
+              break;
+            case 'pnpm':
+              await execa('pnpm', ['create', 'vite', projectName, '--template', 'react-ts'], {
+                stdio: 'inherit',
+              });
+              break;
+            case 'yarn':
+              await execa('yarn', ['create', 'vite', projectName, '--template', 'react-ts'], {
+                stdio: 'inherit',
+              });
+              break;
+            default:
+              await execa('npm', ['create', 'vite@latest', projectName, '--template', 'react-ts'], {
+                stdio: 'inherit',
+              });
+          }
+        }
+        break;
+      case 'vue':
+        if (companion === 'nuxt') {
+          await execa(packageManager, ['dlx', 'nuxi', 'init', projectName]);
+        } else if (companion === 'vite') {
+          switch (packageManager) {
+            case 'bun':
+              await execa('bun', ['create', 'vite', projectName, '--template', 'vue-ts'], {
+                stdio: 'inherit',
+              });
+              break;
+            case 'pnpm':
+              await execa('pnpm', ['create', 'vite', projectName, '--template', 'vue-ts'], {
+                stdio: 'inherit',
+              });
+              break;
+            case 'yarn':
+              await execa('yarn', ['create', 'vite', projectName, '--template', 'vue-ts'], {
+                stdio: 'inherit',
+              });
+              break;
+            default:
+              await execa('npm', ['create', 'vite@latest', projectName, '--template', 'vue-ts'], {
+                stdio: 'inherit',
+              });
+          }
+        }
+        break;
+      case 'svelte':
+        if (companion === 'sveltekit') {
+          await execa(packageManager, ['create', 'svelte@latest', projectName]);
+        } else if (companion === 'vite') {
+          switch (packageManager) {
+            case 'bun':
+              await execa('bun', ['create', 'vite', projectName, '--template', 'svelte-ts'], {
+                stdio: 'inherit',
+              });
+              break;
+            case 'pnpm':
+              await execa('pnpm', ['create', 'vite', projectName, '--template', 'svelte-ts'], {
+                stdio: 'inherit',
+              });
+              break;
+            case 'yarn':
+              await execa('yarn', ['create', 'vite', projectName, '--template', 'svelte-ts'], {
+                stdio: 'inherit',
+              });
+              break;
+            default:
+              await execa(
+                'npm',
+                ['create', 'vite@latest', projectName, '--template', 'svelte-ts'],
+                { stdio: 'inherit' }
+              );
+          }
+        }
+        break;
+      case 'solid':
+        if (companion === 'solid-start') {
+          await execa(packageManager, ['create', 'solid-start', projectName]);
+        } else if (companion === 'vite') {
+          switch (packageManager) {
+            case 'bun':
+              await execa('bun', ['create', 'vite', projectName, '--template', 'solid-ts'], {
+                stdio: 'inherit',
+              });
+              break;
+            case 'pnpm':
+              await execa('pnpm', ['create', 'vite', projectName, '--template', 'solid-ts'], {
+                stdio: 'inherit',
+              });
+              break;
+            case 'yarn':
+              await execa('yarn', ['create', 'vite', projectName, '--template', 'solid-ts'], {
+                stdio: 'inherit',
+              });
+              break;
+            default:
+              await execa('npm', ['create', 'vite@latest', projectName, '--template', 'solid-ts'], {
+                stdio: 'inherit',
+              });
+          }
+        }
+        break;
+      case 'astro':
+        await execa(packageManager, ['create', 'astro@latest', projectName]);
+        break;
+      case 'qwik':
+        await execa(packageManager, ['create', 'qwik@latest', projectName]);
+        break;
+      case 'angular':
+        await execa(packageManager, ['create', '@angular/cli', projectName]);
+        break;
+    }
+
+    // Install dependencies
+    p.note('Installing dependencies...');
+    await execa(packageManager, ['install'], {
+      cwd: projectName,
+      stdio: 'inherit',
+    });
+
+    // Initialize git repository and set main branch
+    p.note('Initializing git repository...');
+    await execa('git', ['init'], {
+      cwd: projectName,
+      stdio: 'inherit',
+    });
+    await execa('git', ['branch', '-M', 'main'], {
+      cwd: projectName,
+      stdio: 'inherit',
+    });
+
+    p.note(`Successfully created ${framework} project with ${companion}`);
+  } catch (error) {
+    p.note(`Failed to create project: ${error}`);
+    process.exit(1);
+  }
+};

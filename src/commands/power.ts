@@ -102,9 +102,9 @@ export const projectTypes: ProjectType[] = [
   },
 ];
 
-export const project = new Command()
-  .name('project')
-  .description('Project management commands')
+export const power = new Command()
+  .name('power')
+  .description('Power commands')
   .action(async () => {
     p.intro('Project Configuration');
 
