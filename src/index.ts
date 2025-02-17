@@ -10,7 +10,7 @@ const program = new Command();
 // Display the ASCII art
 console.log(towerAscii);
 
-program.name('tower').description('Scaffold Anything: Script to Startup').version('1.0.0');
+program.name('tower').description('Scaffold Anything: Script to Startup').version('0.0.1');
 
 program.addCommand(power).addCommand(snacks);
 

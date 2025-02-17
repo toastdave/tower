@@ -1,13 +1,13 @@
 import * as p from '@clack/prompts';
 import { Command } from 'commander';
 import { execa } from 'execa';
-import handleApi from '../paths/project/api.js';
-import handleBaseProject from '../paths/project/base-project.js';
-import handleCrossPlatform from '../paths/project/cross-platform.js';
-import handleDesktopApp from '../paths/project/desktop.js';
-import handleFunctions from '../paths/project/functions.js';
-import handleMobileApp from '../paths/project/mobile.js';
-import handleWebApp from '../paths/project/web.js';
+import handleApi from '../paths/power/api.js';
+import handleBaseProject from '../paths/power/base-project.js';
+import handleCrossPlatform from '../paths/power/cross-platform.js';
+import handleDesktopApp from '../paths/power/desktop.js';
+import handleFunctions from '../paths/power/functions.js';
+import handleMobileApp from '../paths/power/mobile.js';
+import handleWebApp from '../paths/power/web.js';
 
 type Language = {
   name: string;
