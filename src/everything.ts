@@ -83,8 +83,30 @@ export type Snack = {
   name: string;
   description: string;
   languages?: string[];
+  frameworks?: string[];
+  setup: {
+    installers: Installer[];
+    files: File[];
+  };
   installers?: Installer[];
   documentation?: string;
 };
 
-export const Snacks: Snack[] = [];
+export type File = {
+  path: string;
+  content: string;
+};
+
+export const Snacks: Snack[] = [
+  {
+    name: 'Tailwind CSS',
+    description:
+      'A utility-first CSS framework packed with classes like flex, pt-4, text-center and rotate-90 that can be composed to build any design, directly in your markup.',
+    languages: ['Typescript', 'Javascript'],
+    frameworks: ['React', 'Vue', 'Svelte', 'Lit', 'Solid', 'Qwik'],
+    setup: {
+      installers: [],
+      files: [],
+    },
+  },
+];

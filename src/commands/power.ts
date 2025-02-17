@@ -1,6 +1,7 @@
 import * as p from '@clack/prompts';
 import { Command } from 'commander';
 import { execa } from 'execa';
+import { Everything } from '../everything.js';
 import handleApi from '../paths/power/api.js';
 import handleBaseProject from '../paths/power/base-project.js';
 import handleCrossPlatform from '../paths/power/cross-platform.js';
@@ -9,61 +10,11 @@ import handleFunctions from '../paths/power/functions.js';
 import handleMobileApp from '../paths/power/mobile.js';
 import handleWebApp from '../paths/power/web.js';
 
-type Language = {
-  name: string;
-  value: string;
-};
-
-type PackageManager = {
-  name: string;
-  value: string;
-  language: string;
-};
-
 export type ProjectType = {
   name: string;
   value: string;
   description: string;
 };
-
-const languages: Language[] = [
-  { name: 'JavaScript/TypeScript', value: 'JavaScript' },
-  { name: 'Python', value: 'Python' },
-  { name: 'Go', value: 'Go' },
-  { name: 'Rust', value: 'Rust' },
-  { name: 'C#', value: 'C#' },
-  { name: 'Java', value: 'Java' },
-];
-
-const packageManagers: PackageManager[] = [
-  // JavaScript/Node.js
-  { name: 'npm - Node Package Manager', value: 'npm', language: 'JavaScript' },
-  { name: 'yarn - Alternative Node Package Manager', value: 'yarn', language: 'JavaScript' },
-  { name: 'pnpm - Performant Node Package Manager', value: 'pnpm', language: 'JavaScript' },
-  {
-    name: 'bun - All-in-one JavaScript runtime & package manager',
-    value: 'bun',
-    language: 'JavaScript',
-  },
-
-  // Python
-  { name: 'pip - Python Package Installer', value: 'pip', language: 'Python' },
-  { name: 'poetry - Python dependency management', value: 'poetry', language: 'Python' },
-  { name: 'conda - Python package and environment management', value: 'conda', language: 'Python' },
-
-  // Go
-  { name: 'go mod - Official Go package manager', value: 'go', language: 'Go' },
-
-  // Rust
-  { name: 'cargo - Official Rust package manager', value: 'cargo', language: 'Rust' },
-
-  // C#/.NET
-  { name: 'NuGet - .NET package manager', value: 'nuget', language: 'C#' },
-
-  // Java
-  { name: 'Maven - Java build and package manager', value: 'maven', language: 'Java' },
-  { name: 'Gradle - Build and package manager', value: 'gradle', language: 'Java' },
-];
 
 export const projectTypes: ProjectType[] = [
   {
@@ -134,12 +85,19 @@ export const power = new Command()
       process.exit(0);
     }
 
-    // Language Selection
+    const languages = Object.keys(Everything).map((key) => ({
+      name: key,
+      value: key,
+      description: Everything[key].description,
+    }));
+
+    // Then use this array for your select prompt
     const language = await p.select({
       message: 'Choose a programming language:',
       options: languages.map((lang) => ({
         label: lang.name,
         value: lang.value,
+        hint: lang.description,
       })),
     });
 
@@ -148,14 +106,16 @@ export const power = new Command()
       process.exit(0);
     }
 
-    // Package Manager Selection
-    const filteredPackageManagers = packageManagers.filter((pm) => pm.language === language);
+    // After language selection
+    const packageManagers = Everything[language as string].packageManagers.map((pm: string) => ({
+      label: pm,
+      value: pm,
+      hint: `Use ${pm} package manager`,
+    }));
+
     const packageManager = await p.select({
       message: `Choose a package manager for ${language}:`,
-      options: filteredPackageManagers.map((pm) => ({
-        label: pm.name,
-        value: pm.value,
-      })),
+      options: packageManagers,
     });
 
     if (p.isCancel(packageManager)) {
