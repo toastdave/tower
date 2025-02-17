@@ -1,6 +1,6 @@
 import * as p from '@clack/prompts';
 import { execa } from 'execa';
-import { Frameworks } from '../../everything.js';
+import { Everything } from '../../everything.js';
 
 export type Framework = {
   name: string;
@@ -92,7 +92,9 @@ const createProject = async (
     switch (framework) {
       case 'react':
         if (companion === 'next') {
-          const nextConfig = Frameworks.find((t: { name: string }) => t.name === 'Next.js');
+          const nextConfig = Everything.Typescript.companions.find(
+            (t: { name: string }) => t.name === 'Next.js'
+          );
           const nextInstaller = nextConfig?.installers?.find(
             (i: { packageManager: string }) => i.packageManager === packageManager
           );
@@ -104,7 +106,9 @@ const createProject = async (
             );
           }
         } else if (companion === 'vite') {
-          const viteConfig = Frameworks.find((t: { name: string }) => t.name === 'Vite');
+          const viteConfig = Everything.Typescript.companions.find(
+            (t: { name: string }) => t.name === 'Vite'
+          );
           const viteInstaller = viteConfig?.installers?.find(
             (i: { packageManager: string }) => i.packageManager === packageManager
           );
