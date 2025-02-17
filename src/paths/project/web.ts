@@ -125,7 +125,8 @@ const companionOptions: Record<string, Companion[]> = {
 
 export default async function handleWebApp(
   language: string,
-  packageManager: string
+  packageManager: string,
+  projectName: string
 ): Promise<{ framework: string; companion: string; projectName: string } | symbol> {
   const framework = await p.select({
     message: 'What framework would you like to use?',
@@ -155,15 +156,6 @@ export default async function handleWebApp(
     process.exit(0);
   }
 
-  const projectName = await p.text({
-    message: 'What is the name of your project?',
-  });
-
-  if (p.isCancel(projectName)) {
-    p.cancel('Operation cancelled');
-    process.exit(0);
-  }
-
   const result = {
     framework: framework as string,
     companion: companion as string,
@@ -186,7 +178,27 @@ const createProject = async (
     switch (framework) {
       case 'react':
         if (companion === 'next') {
-          await execa(packageManager, ['create', 'next-app', projectName], { stdio: 'inherit' });
+          switch (packageManager) {
+            case 'pnpm':
+              await execa('npx', ['create-next-app@latest', projectName, '--use-pnpm', '--yes'], {
+                stdio: 'inherit',
+              });
+              break;
+            case 'yarn':
+              await execa('npx', ['create-next-app@latest', projectName, '--use-yarn', '--yes'], {
+                stdio: 'inherit',
+              });
+              break;
+            case 'bun':
+              await execa('npx', ['create-next-app@latest', projectName, '--use-bun', '--yes'], {
+                stdio: 'inherit',
+              });
+              break;
+            default:
+              await execa('npx', ['create-next-app@latest', projectName, '--yes'], {
+                stdio: 'inherit',
+              });
+          }
         } else if (companion === 'vite') {
           switch (packageManager) {
             case 'bun':
@@ -308,17 +320,6 @@ const createProject = async (
     // Install dependencies
     p.note('Installing dependencies...');
     await execa(packageManager, ['install'], {
-      cwd: projectName,
-      stdio: 'inherit',
-    });
-
-    // Initialize git repository and set main branch
-    p.note('Initializing git repository...');
-    await execa('git', ['init'], {
-      cwd: projectName,
-      stdio: 'inherit',
-    });
-    await execa('git', ['branch', '-M', 'main'], {
       cwd: projectName,
       stdio: 'inherit',
     });

@@ -1,5 +1,6 @@
 import * as p from '@clack/prompts';
 import { Command } from 'commander';
+import { execa } from 'execa';
 import handleApi from '../paths/project/api.js';
 import handleBaseProject from '../paths/project/base-project.js';
 import handleCrossPlatform from '../paths/project/cross-platform.js';
@@ -108,7 +109,7 @@ export const power = new Command()
   .action(async () => {
     p.intro('Project Configuration');
 
-    // 1. Project Type Selection
+    // Project Type Selection
     const projectType = await p.select({
       message: 'What type of project would you like to create?',
       options: projectTypes.map((type) => ({
@@ -123,7 +124,17 @@ export const power = new Command()
       process.exit(0);
     }
 
-    // 2. Language Selection
+    // Pick a name any name
+    const projectName = await p.text({
+      message: 'What is the name of your project?',
+    });
+
+    if (p.isCancel(projectName)) {
+      p.cancel('Operation cancelled');
+      process.exit(0);
+    }
+
+    // Language Selection
     const language = await p.select({
       message: 'Choose a programming language:',
       options: languages.map((lang) => ({
@@ -137,7 +148,7 @@ export const power = new Command()
       process.exit(0);
     }
 
-    // 3. Package Manager Selection
+    // Package Manager Selection
     const filteredPackageManagers = packageManagers.filter((pm) => pm.language === language);
     const packageManager = await p.select({
       message: `Choose a package manager for ${language}:`,
@@ -156,7 +167,11 @@ export const power = new Command()
     let result = null;
     switch (projectType as string) {
       case 'web':
-        result = await handleWebApp(language as string, packageManager as string);
+        result = await handleWebApp(
+          language as string,
+          packageManager as string,
+          projectName as string
+        );
         if (typeof result === 'object' && 'framework' in result) {
           p.note(
             `Selected framework: ${result.framework}\n` +
@@ -185,6 +200,17 @@ export const power = new Command()
         result = await handleBaseProject(language as string, packageManager as string);
         break;
     }
+
+    // Initialize git repository and set main branch
+    p.note('Initializing git repository...');
+    await execa('git', ['init'], {
+      cwd: projectName,
+      stdio: 'inherit',
+    });
+    await execa('git', ['branch', '-M', 'main'], {
+      cwd: projectName,
+      stdio: 'inherit',
+    });
 
     p.outro('Project configuration completed!');
   });
