@@ -86,19 +86,15 @@ export const power = new Command()
     }
 
     const languages = Object.keys(Everything).map((key) => ({
-      name: key,
+      label: key,
       value: key,
-      description: Everything[key].description,
+      hint: Everything[key].description,
     }));
 
     // Then use this array for your select prompt
     const language = await p.select({
       message: 'Choose a programming language:',
-      options: languages.map((lang) => ({
-        label: lang.name,
-        value: lang.value,
-        hint: lang.description,
-      })),
+      options: languages,
     });
 
     if (p.isCancel(language)) {

@@ -84,12 +84,15 @@ export type Snack = {
   description: string;
   languages?: string[];
   frameworks?: string[];
-  setup: {
-    installers: Installer[];
-    files: File[];
-  };
-  installers?: Installer[];
   documentation?: string;
+  setup: SetupOption[];
+  installers?: Installer[];
+};
+
+export type SetupOption = {
+  name: string;
+  installers: Installer[];
+  files: File[];
 };
 
 export type File = {
@@ -102,11 +105,54 @@ export const Snacks: Snack[] = [
     name: 'Tailwind CSS',
     description:
       'A utility-first CSS framework packed with classes like flex, pt-4, text-center and rotate-90 that can be composed to build any design, directly in your markup.',
-    languages: ['Typescript', 'Javascript'],
+    languages: ['Typescript'],
     frameworks: ['React', 'Vue', 'Svelte', 'Lit', 'Solid', 'Qwik'],
-    setup: {
-      installers: [],
-      files: [],
-    },
+    documentation: 'https://tailwindcss.com/docs',
+    setup: [
+      {
+        name: 'Vite',
+        installers: [
+          {
+            packageManager: 'npm',
+            command: 'npm install tailwindcss @tailwindcss/vite',
+          },
+          {
+            packageManager: 'pnpm',
+            command: 'pnpm add tailwindcss @tailwindcss/vite',
+          },
+          {
+            packageManager: 'yarn',
+            command: 'yarn add tailwindcss @tailwindcss/vite',
+          },
+          {
+            packageManager: 'bun',
+            command: 'bun add tailwindcss @tailwindcss/vite',
+          },
+        ],
+        files: [],
+      },
+      {
+        name: 'PostCSS',
+        installers: [
+          {
+            packageManager: 'npm',
+            command: 'npm install tailwindcss @tailwindcss/postcss postcss',
+          },
+          {
+            packageManager: 'pnpm',
+            command: 'pnpm add tailwindcss @tailwindcss/postcss postcss',
+          },
+          {
+            packageManager: 'yarn',
+            command: 'yarn add tailwindcss @tailwindcss/postcss postcss',
+          },
+          {
+            packageManager: 'bun',
+            command: 'bun add tailwindcss @tailwindcss/postcss postcss',
+          },
+        ],
+        files: [],
+      },
+    ],
   },
 ];
