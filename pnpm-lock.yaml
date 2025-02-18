@@ -17,10 +17,16 @@ importers:
       commander:
         specifier: ^11.1.0
         version: 11.1.0
+      diff:
+        specifier: ^7.0.0
+        version: 7.0.0
       execa:
         specifier: ^8.0.1
         version: 8.0.1
     devDependencies:
+      '@types/diff':
+        specifier: ^7.0.1
+        version: 7.0.1
       '@types/node':
         specifier: ^20.11.19
         version: 20.17.17
@@ -41,6 +47,9 @@ packages:
     bundledDependencies:
       - is-unicode-supported
 
+  '@types/diff@7.0.1':
+    resolution: {integrity: sha512-R/BHQFripuhW6XPXy05hIvXJQdQ4540KnTvEFHSLjXfHYM41liOLKgIJEyYYiQe796xpaMHfe4Uj/p7Uvng2vA==}
+
   '@types/node@20.17.17':
     resolution: {integrity: sha512-/WndGO4kIfMicEQLTi/mDANUu/iVUhT7KboZPdEqqHQ4aTS+3qT3U5gIqWDFV+XouorjfgGqvKILJeHhuQgFYg==}
 
@@ -55,6 +64,10 @@ packages:
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
+
+  diff@7.0.0:
+    resolution: {integrity: sha512-PJWHUb1RFevKCwaFA9RlG5tCd+FO5iRh9A8HEtkmBH2Li03iJriB6m6JIN4rGz3K3JLawI7/veA1xzRKP6ISBw==}
+    engines: {node: '>=0.3.1'}
 
   execa@8.0.1:
     resolution: {integrity: sha512-VyhnebXciFV2DESc+p6B+y0LjSm0krU4OgJN44qFAhBY0TJ+1V61tYD2+wHusZ6F9n5K+vl8k0sTy7PEfV4qpg==}
@@ -151,6 +164,8 @@ snapshots:
       picocolors: 1.1.1
       sisteransi: 1.0.5
 
+  '@types/diff@7.0.1': {}
+
   '@types/node@20.17.17':
     dependencies:
       undici-types: 6.19.8
@@ -164,6 +179,8 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
+
+  diff@7.0.0: {}
 
   execa@8.0.1:
     dependencies:

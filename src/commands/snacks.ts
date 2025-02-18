@@ -2,59 +2,61 @@ import * as p from '@clack/prompts';
 import { Command } from 'commander';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { Snacks } from '../everything.js';
+import handleTailwind from '../paths/snacks/tailwind.js';
 
-type Tool = {
-  name: string;
-  value: string;
-  description: string;
-  frameworks?: string[];
-};
+// type Tool = {
+//   name: string;
+//   value: string;
+//   description: string;
+//   frameworks?: string[];
+// };
 
-const tools: Tool[] = [
-  {
-    name: 'Tailwind CSS',
-    value: 'tailwind',
-    description: 'A utility-first CSS framework',
-    frameworks: ['react', 'vue', 'svelte', 'astro', 'solid', 'next'],
-  },
-  {
-    name: 'shadcn/ui',
-    value: 'shadcn',
-    description: 'Re-usable components built with Radix UI and Tailwind',
-    frameworks: ['react', 'next'],
-  },
-  {
-    name: 'Drizzle ORM',
-    value: 'drizzle',
-    description: 'TypeScript ORM with edge-runtime compatibility',
-  },
-  {
-    name: 'SQLite + LibSQL',
-    value: 'libsql',
-    description: 'Local SQLite database with LibSQL extensions',
-  },
-  {
-    name: 'PostgreSQL Docker',
-    value: 'postgres-docker',
-    description: 'PostgreSQL database in Docker container',
-  },
-  {
-    name: 'MySQL Docker',
-    value: 'mysql-docker',
-    description: 'MySQL database in Docker container',
-  },
-  {
-    name: 'Prisma',
-    value: 'prisma',
-    description: 'Next-generation ORM for Node.js and TypeScript',
-  },
-  {
-    name: 'tRPC',
-    value: 'trpc',
-    description: 'End-to-end typesafe APIs made easy',
-    frameworks: ['react', 'next'],
-  },
-];
+// const tools: Tool[] = [
+//   {
+//     name: 'Tailwind CSS',
+//     value: 'tailwind',
+//     description: 'A utility-first CSS framework',
+//     frameworks: ['react', 'vue', 'svelte', 'astro', 'solid', 'next'],
+//   },
+//   {
+//     name: 'shadcn/ui',
+//     value: 'shadcn',
+//     description: 'Re-usable components built with Radix UI and Tailwind',
+//     frameworks: ['react', 'next'],
+//   },
+//   {
+//     name: 'Drizzle ORM',
+//     value: 'drizzle',
+//     description: 'TypeScript ORM with edge-runtime compatibility',
+//   },
+//   {
+//     name: 'SQLite + LibSQL',
+//     value: 'libsql',
+//     description: 'Local SQLite database with LibSQL extensions',
+//   },
+//   {
+//     name: 'PostgreSQL Docker',
+//     value: 'postgres-docker',
+//     description: 'PostgreSQL database in Docker container',
+//   },
+//   {
+//     name: 'MySQL Docker',
+//     value: 'mysql-docker',
+//     description: 'MySQL database in Docker container',
+//   },
+//   {
+//     name: 'Prisma',
+//     value: 'prisma',
+//     description: 'Next-generation ORM for Node.js and TypeScript',
+//   },
+//   {
+//     name: 'tRPC',
+//     value: 'trpc',
+//     description: 'End-to-end typesafe APIs made easy',
+//     frameworks: ['react', 'next'],
+//   },
+// ];
 
 async function detectFrameworkAndPackageManager(): Promise<{
   framework: string | null;
@@ -206,69 +208,40 @@ export const snacks = new Command()
       packageManager = selectedPM as string;
     }
 
-    const compatibleTools = tools.filter(
-      (tool) => !tool.frameworks || tool.frameworks.includes(framework as string)
-    );
+    // const compatibleTools = tools.filter(
+    //   (tool) => !tool.frameworks || tool.frameworks.includes(framework as string)
+    // );
 
-    const selectedTools = await p.multiselect({
-      message: 'Select tools to add to your project:',
-      options: compatibleTools.map((tool) => ({
-        label: tool.name,
-        value: tool.value,
-        hint: tool.description,
+    const snacks = await p.multiselect({
+      message: 'Select snacks to add to your project:',
+      options: Snacks.map((snack) => ({
+        label: snack.name,
+        value: snack.name,
+        hint: snack.description,
       })),
     });
 
-    if (p.isCancel(selectedTools)) {
+    if (p.isCancel(snacks)) {
       p.cancel('Operation cancelled');
       process.exit(0);
     }
 
-    const { execa } = await import('execa');
+    // Create snacks directory if it doesn't exist
+    const snacksDir = path.join(process.cwd(), 'snacks');
+    await fs.mkdir(snacksDir, { recursive: true });
 
-    for (const tool of selectedTools as string[]) {
+    for (const snack of snacks as string[]) {
       try {
-        switch (tool) {
-          case 'tailwind':
-            await execa(
-              packageManager as string,
-              ['add', '-D', 'tailwindcss', 'postcss', 'autoprefixer'],
-              { stdio: 'inherit' }
-            );
-            await execa('npx', ['tailwindcss', 'init', '-p'], { stdio: 'inherit' });
-            break;
-          case 'shadcn':
-            await execa('npx', ['shadcn-ui@latest', 'init'], { stdio: 'inherit' });
-            break;
-          case 'drizzle':
-            await execa(packageManager as string, ['add', 'drizzle-orm'], { stdio: 'inherit' });
-            await execa(packageManager as string, ['add', '-D', 'drizzle-kit'], {
-              stdio: 'inherit',
-            });
-            break;
-          case 'libsql':
-            await execa(packageManager as string, ['add', '@libsql/client'], { stdio: 'inherit' });
-            break;
-          case 'postgres-docker':
-          case 'mysql-docker':
-            // TODO: Copy appropriate Dockerfile and docker-compose.yml
-            break;
-          case 'prisma':
-            await execa(packageManager as string, ['add', '-D', 'prisma'], { stdio: 'inherit' });
-            await execa(packageManager as string, ['add', '@prisma/client'], { stdio: 'inherit' });
-            await execa('npx', ['prisma', 'init'], { stdio: 'inherit' });
-            break;
-          case 'trpc':
-            await execa(packageManager as string, ['add', '@trpc/server', '@trpc/client'], {
-              stdio: 'inherit',
-            });
+        switch (snack) {
+          case 'Tailwind CSS':
+            await handleTailwind(packageManager, snacksDir);
             break;
         }
-        p.note(`✓ Successfully installed ${tool}`);
+        p.note(`✓ Successfully installed ${snack}`);
       } catch (error) {
-        p.note(`Failed to install ${tool}: ${error}`);
+        p.note(`Failed to install ${snack}: ${error}`);
       }
     }
 
-    p.outro('All selected tools have been installed!');
+    p.outro('All selected snacks have been installed!');
   });

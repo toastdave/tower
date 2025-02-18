@@ -129,7 +129,26 @@ export const Snacks: Snack[] = [
             command: 'bun add tailwindcss @tailwindcss/vite',
           },
         ],
-        files: [],
+        files: [
+          {
+            path: './vite.config.ts',
+            content: `
+import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
+export default defineConfig({
+plugins: [
+tailwindcss(),
+],
+})
+            `,
+          },
+          {
+            path: './src/index.css',
+            content: `
+@import "tailwindcss";
+            `,
+          },
+        ],
       },
       {
         name: 'PostCSS',
@@ -151,7 +170,24 @@ export const Snacks: Snack[] = [
             command: 'bun add tailwindcss @tailwindcss/postcss postcss',
           },
         ],
-        files: [],
+        files: [
+          {
+            path: './postcss.config.mjs',
+            content: `
+export default {
+plugins: {
+"@tailwindcss/postcss": {},
+}
+}
+            `,
+          },
+          {
+            path: './src/index.css',
+            content: `
+@import "tailwindcss";
+            `,
+          },
+        ],
       },
     ],
   },
