@@ -191,4 +191,58 @@ plugins: {
       },
     ],
   },
+  {
+    name: 'Shadcn UI',
+    description: 'Build complex React apps with ease',
+    languages: ['Typescript'],
+    frameworks: ['React'],
+    documentation: 'https://ui.shadcn.com/docs',
+    setup: [
+      {
+        name: 'Vite',
+        installers: [
+          {
+            packageManager: 'npm',
+            command: 'npm install @shadcn/ui',
+          },
+          {
+            packageManager: 'pnpm',
+            command: 'pnpm add @shadcn/ui',
+          },
+          {
+            packageManager: 'yarn',
+            command: 'yarn add @shadcn/ui',
+          },
+          {
+            packageManager: 'bun',
+            command: 'bun add @shadcn/ui',
+          },
+        ],
+        files: [
+          {
+            path: './tsconfig.json',
+            content: `
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}
+            `,
+          },
+        ],
+      },
+    ],
+  },
 ];
