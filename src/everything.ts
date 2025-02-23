@@ -20,6 +20,34 @@ export type Language = {
   documentation: string;
 };
 
+export type Snack = {
+  name: string;
+  description: string;
+  languages?: string[];
+  frameworks?: string[];
+  documentation?: string;
+  setup: SetupOption[];
+  installers?: Installer[];
+};
+
+export type SetupOption = {
+  name: string;
+  installers: Installer[];
+  files: File[];
+};
+
+export type File = {
+  path: string;
+  content: string;
+};
+
+export enum MetaList {
+  Any = 'Any',
+  Other = 'Other',
+  Vite = 'Vite',
+  NextJS = 'NextJS',
+}
+
 export const Everything: Record<string, Language> = {
   Typescript: {
     packageManagers: ['npm', 'pnpm', 'yarn', 'bun'],
@@ -28,7 +56,7 @@ export const Everything: Record<string, Language> = {
     frameworks: ['React', 'Vue', 'Svelte', 'Lit', 'Solid', 'Qwik'],
     companions: [
       {
-        name: 'Next.js',
+        name: MetaList.NextJS,
         description: 'The React Framework for Production',
         frameworks: ['React'],
         installers: [
@@ -52,7 +80,7 @@ export const Everything: Record<string, Language> = {
         documentation: 'https://nextjs.org/docs',
       },
       {
-        name: 'Vite',
+        name: MetaList.Vite,
         description: 'Next Generation Frontend Tooling',
         frameworks: ['React', 'Vue', 'Svelte', 'Lit', 'Solid', 'Qwik'],
         installers: [
@@ -79,27 +107,6 @@ export const Everything: Record<string, Language> = {
   },
 };
 
-export type Snack = {
-  name: string;
-  description: string;
-  languages?: string[];
-  frameworks?: string[];
-  documentation?: string;
-  setup: SetupOption[];
-  installers?: Installer[];
-};
-
-export type SetupOption = {
-  name: string;
-  installers: Installer[];
-  files: File[];
-};
-
-export type File = {
-  path: string;
-  content: string;
-};
-
 export const Snacks: Snack[] = [
   {
     name: 'Tailwind CSS',
@@ -110,7 +117,7 @@ export const Snacks: Snack[] = [
     documentation: 'https://tailwindcss.com/docs',
     setup: [
       {
-        name: 'Vite',
+        name: MetaList.Vite,
         installers: [
           {
             packageManager: 'npm',
@@ -151,23 +158,39 @@ tailwindcss(),
         ],
       },
       {
-        name: 'PostCSS',
+        name: MetaList.Other,
         installers: [
           {
             packageManager: 'npm',
-            commands: ['npm install tailwindcss @tailwindcss/postcss postcss'],
+            commands: [
+              'npm install tailwindcss',
+              '@tailwindcss/postcss postcss',
+              'npx shadcn@latest add button',
+            ],
           },
           {
             packageManager: 'pnpm',
-            commands: ['pnpm add tailwindcss @tailwindcss/postcss postcss'],
+            commands: [
+              'pnpm add tailwindcss',
+              '@tailwindcss/postcss postcss',
+              'pnpm dlx shadcn@latest add button',
+            ],
           },
           {
             packageManager: 'yarn',
-            commands: ['yarn add tailwindcss @tailwindcss/postcss postcss'],
+            commands: [
+              'yarn add tailwindcss',
+              '@tailwindcss/postcss postcss',
+              'npx shadcn@latest add button',
+            ],
           },
           {
             packageManager: 'bun',
-            commands: ['bun add tailwindcss @tailwindcss/postcss postcss'],
+            commands: [
+              'bun add tailwindcss',
+              '@tailwindcss/postcss postcss',
+              'bunx --bun shadcn@latest add button',
+            ],
           },
         ],
         files: [
@@ -199,23 +222,39 @@ plugins: {
     documentation: 'https://ui.shadcn.com/docs',
     setup: [
       {
-        name: 'Vite',
+        name: MetaList.Vite,
         installers: [
           {
             packageManager: 'npm',
-            commands: ['npm install @shadcn/ui'],
+            commands: [
+              'npx shadcn@latest init',
+              'npm install -D @types/node',
+              'npx shadcn@latest add button',
+            ],
           },
           {
             packageManager: 'pnpm',
-            commands: ['pnpm add @shadcn/ui'],
+            commands: [
+              'pnpm dlx shadcn@latest init',
+              'pnpm add -D @types/node',
+              'pnpm dlx shadcn@latest add button',
+            ],
           },
           {
             packageManager: 'yarn',
-            commands: ['yarn add @shadcn/ui'],
+            commands: [
+              'npx shadcn@latest init',
+              'yarn add -D @types/node',
+              'npx shadcn@latest add button',
+            ],
           },
           {
             packageManager: 'bun',
-            commands: ['bun add @shadcn/ui'],
+            commands: [
+              'bunx --bun shadcn@latest init',
+              'bun add -D @types/node',
+              'bunx --bun shadcn@latest add button',
+            ],
           },
         ],
         files: [
@@ -256,7 +295,23 @@ plugins: {
     // ...
   }
 }
+            `,
+          },
+          {
+            path: './vite.config.ts',
+            content: `
+import path from "path"
+import react from "@vitejs/plugin-react"
+import { defineConfig } from "vite"
 
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+})
             `,
           },
         ],

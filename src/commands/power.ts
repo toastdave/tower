@@ -168,5 +168,16 @@ export const power = new Command()
       stdio: 'inherit',
     });
 
+    // After project creation, prompt for snacks
+    const runSnacks = await p.confirm({
+      message: 'Would you like to add some snacks to your project? (Tailwind, etc.)',
+      initialValue: true,
+    });
+
+    if (runSnacks) {
+      process.chdir(projectName); // Change to the project directory
+      await execa('tower', ['snacks'], { stdio: 'inherit' });
+    }
+
     p.outro('Project configuration completed!');
   });
