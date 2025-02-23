@@ -8,7 +8,7 @@ export type Companions = {
 
 export type Installer = {
   packageManager: string;
-  command: string;
+  commands: string[];
   custom?: boolean;
 };
 
@@ -34,19 +34,19 @@ export const Everything: Record<string, Language> = {
         installers: [
           {
             packageManager: 'npm',
-            command: 'npx create-next-app@latest',
+            commands: ['npx create-next-app@latest'],
           },
           {
             packageManager: 'pnpm',
-            command: 'npx create-next-app@latest --use-pnpm',
+            commands: ['npx create-next-app@latest --use-pnpm'],
           },
           {
             packageManager: 'yarn',
-            command: 'npx create-next-app@latest --use-yarn',
+            commands: ['npx create-next-app@latest --use-yarn'],
           },
           {
             packageManager: 'bun',
-            command: 'npx create-next-app@latest --use-bun',
+            commands: ['npx create-next-app@latest --use-bun'],
           },
         ],
         documentation: 'https://nextjs.org/docs',
@@ -58,19 +58,19 @@ export const Everything: Record<string, Language> = {
         installers: [
           {
             packageManager: 'npm',
-            command: 'npm create vite@latest',
+            commands: ['npm create vite@latest'],
           },
           {
             packageManager: 'pnpm',
-            command: 'pnpm create vite --template react-ts',
+            commands: ['pnpm create vite --template react-ts'],
           },
           {
             packageManager: 'yarn',
-            command: 'yarn create vite --template react-ts',
+            commands: ['yarn create vite --template react-ts'],
           },
           {
             packageManager: 'bun',
-            command: 'bun create vite --template react-ts',
+            commands: ['bun create vite --template react-ts'],
           },
         ],
         documentation: 'https://vitejs.dev/guide/',
@@ -114,19 +114,19 @@ export const Snacks: Snack[] = [
         installers: [
           {
             packageManager: 'npm',
-            command: 'npm install tailwindcss @tailwindcss/vite',
+            commands: ['npm install tailwindcss @tailwindcss/vite'],
           },
           {
             packageManager: 'pnpm',
-            command: 'pnpm add tailwindcss @tailwindcss/vite',
+            commands: ['pnpm add tailwindcss @tailwindcss/vite'],
           },
           {
             packageManager: 'yarn',
-            command: 'yarn add tailwindcss @tailwindcss/vite',
+            commands: ['yarn add tailwindcss @tailwindcss/vite'],
           },
           {
             packageManager: 'bun',
-            command: 'bun add tailwindcss @tailwindcss/vite',
+            commands: ['bun add tailwindcss @tailwindcss/vite'],
           },
         ],
         files: [
@@ -155,19 +155,19 @@ tailwindcss(),
         installers: [
           {
             packageManager: 'npm',
-            command: 'npm install tailwindcss @tailwindcss/postcss postcss',
+            commands: ['npm install tailwindcss @tailwindcss/postcss postcss'],
           },
           {
             packageManager: 'pnpm',
-            command: 'pnpm add tailwindcss @tailwindcss/postcss postcss',
+            commands: ['pnpm add tailwindcss @tailwindcss/postcss postcss'],
           },
           {
             packageManager: 'yarn',
-            command: 'yarn add tailwindcss @tailwindcss/postcss postcss',
+            commands: ['yarn add tailwindcss @tailwindcss/postcss postcss'],
           },
           {
             packageManager: 'bun',
-            command: 'bun add tailwindcss @tailwindcss/postcss postcss',
+            commands: ['bun add tailwindcss @tailwindcss/postcss postcss'],
           },
         ],
         files: [
@@ -203,19 +203,19 @@ plugins: {
         installers: [
           {
             packageManager: 'npm',
-            command: 'npm install @shadcn/ui',
+            commands: ['npm install @shadcn/ui'],
           },
           {
             packageManager: 'pnpm',
-            command: 'pnpm add @shadcn/ui',
+            commands: ['pnpm add @shadcn/ui'],
           },
           {
             packageManager: 'yarn',
-            command: 'yarn add @shadcn/ui',
+            commands: ['yarn add @shadcn/ui'],
           },
           {
             packageManager: 'bun',
-            command: 'bun add @shadcn/ui',
+            commands: ['bun add @shadcn/ui'],
           },
         ],
         files: [
@@ -239,6 +239,24 @@ plugins: {
     }
   }
 }
+            `,
+          },
+          {
+            path: './tsconfig.app.json',
+            content: `
+{
+  "compilerOptions": {
+    // ...
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
+    // ...
+  }
+}
+
             `,
           },
         ],

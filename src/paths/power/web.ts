@@ -99,11 +99,10 @@ const createProject = async (
             (i: { packageManager: string }) => i.packageManager === packageManager
           );
           if (nextInstaller) {
-            await execa(
-              nextInstaller.command.split(' ')[0],
-              [...nextInstaller.command.split(' ').slice(1), projectName],
-              { stdio: 'inherit' }
-            );
+            for (const command of nextInstaller.commands) {
+              const [cmd, ...args] = command.split(' ');
+              await execa(cmd, [...args, projectName], { stdio: 'inherit' });
+            }
           }
         } else if (companion === 'vite') {
           const viteConfig = Everything.Typescript.companions.find(
@@ -113,11 +112,10 @@ const createProject = async (
             (i: { packageManager: string }) => i.packageManager === packageManager
           );
           if (viteInstaller) {
-            await execa(
-              viteInstaller.command.split(' ')[0],
-              [...viteInstaller.command.split(' ').slice(1), projectName],
-              { stdio: 'inherit' }
-            );
+            for (const command of viteInstaller.commands) {
+              const [cmd, ...args] = command.split(' ');
+              await execa(cmd, [...args, projectName], { stdio: 'inherit' });
+            }
           }
         }
         break;

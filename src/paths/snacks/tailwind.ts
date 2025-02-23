@@ -47,9 +47,10 @@ async function handleViteTailwind(packageManager: string, tailwindDir: string) {
     throw new Error(`No installer found for package manager: ${packageManager}`);
   }
 
-  console.log('Installing with command:', installer.command); //
-  const [cmd, ...args] = installer.command.split(' ');
-  await execa(cmd, args, { stdio: 'inherit' });
+  for (const command of installer.commands) {
+    const [cmd, ...args] = command.split(' ');
+    await execa(cmd, args, { stdio: 'inherit' });
+  }
   await writeExampleFiles(viteSetup, tailwindDir);
 }
 
@@ -66,7 +67,9 @@ async function handlePostCssTailwind(packageManager: string, tailwindDir: string
     throw new Error(`No installer found for package manager: ${packageManager}`);
   }
 
-  const [cmd, ...args] = installer.command.split(' ');
-  await execa(cmd, args, { stdio: 'inherit' });
+  for (const command of installer.commands) {
+    const [cmd, ...args] = command.split(' ');
+    await execa(cmd, args, { stdio: 'inherit' });
+  }
   await writeExampleFiles(postcssSetup, tailwindDir);
 }
