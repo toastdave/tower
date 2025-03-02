@@ -162,35 +162,19 @@ tailwindcss(),
         installers: [
           {
             packageManager: 'npm',
-            commands: [
-              'npm install tailwindcss',
-              '@tailwindcss/postcss postcss',
-              'npx shadcn@latest add button',
-            ],
+            commands: ['npm install tailwindcss', '@tailwindcss/postcss postcss'],
           },
           {
             packageManager: 'pnpm',
-            commands: [
-              'pnpm add tailwindcss',
-              '@tailwindcss/postcss postcss',
-              'pnpm dlx shadcn@latest add button',
-            ],
+            commands: ['pnpm add tailwindcss', '@tailwindcss/postcss postcss'],
           },
           {
             packageManager: 'yarn',
-            commands: [
-              'yarn add tailwindcss',
-              '@tailwindcss/postcss postcss',
-              'npx shadcn@latest add button',
-            ],
+            commands: ['yarn add tailwindcss', '@tailwindcss/postcss postcss'],
           },
           {
             packageManager: 'bun',
-            commands: [
-              'bun add tailwindcss',
-              '@tailwindcss/postcss postcss',
-              'bunx --bun shadcn@latest add button',
-            ],
+            commands: ['bun add tailwindcss', '@tailwindcss/postcss postcss'],
           },
         ],
         files: [

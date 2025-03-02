@@ -3,6 +3,7 @@ import { Command } from 'commander';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { Snacks } from '../everything.js';
+import handleShadCN from '../paths/snacks/shadcn.js';
 import handleTailwind from '../paths/snacks/tailwind.js';
 
 // type Tool = {
@@ -230,18 +231,27 @@ export const snacks = new Command()
     const snacksDir = path.join(process.cwd(), 'snacks');
     await fs.mkdir(snacksDir, { recursive: true });
 
+    // Create a central commands.txt file
+    const commandsFilePath = path.join(snacksDir, 'commands.txt');
+    // Initialize with empty content or create if doesn't exist
+    await fs.writeFile(commandsFilePath, '', 'utf8');
+
     for (const snack of snacks as string[]) {
       try {
         switch (snack) {
           case 'Tailwind CSS':
-            await handleTailwind(packageManager, snacksDir);
+            await handleTailwind(packageManager, snacksDir, commandsFilePath);
+            break;
+          case 'Shadcn UI':
+            await handleShadCN(packageManager, snacksDir, commandsFilePath);
             break;
         }
-        p.note(`✓ Successfully installed ${snack}`);
+        p.note(`✓ Successfully prepared ${snack}`);
       } catch (error) {
-        p.note(`Failed to install ${snack}: ${error}`);
+        p.note(`Failed to prepare ${snack}: ${error}`);
       }
     }
 
-    p.outro('All selected snacks have been installed!');
+    p.note(`All required commands have been listed in ${commandsFilePath}`);
+    p.outro('All selected snacks have been prepared in the snacks directory!');
   });
