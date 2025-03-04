@@ -7,7 +7,7 @@ export type Companions = {
 };
 
 export type Installer = {
-  packageManager: string;
+  tool: string;
   commands: string[];
   custom?: boolean;
 };
@@ -32,13 +32,13 @@ export type Snack = {
 
 export type SetupOption = {
   name: string;
-  installers: Installer[];
-  files: File[];
+  installers?: Installer[];
+  files?: File[];
 };
 
 export type File = {
   path: string;
-  content: string;
+  content?: string;
 };
 
 export enum MetaList {
@@ -61,19 +61,19 @@ export const Everything: Record<string, Language> = {
         frameworks: ['React'],
         installers: [
           {
-            packageManager: 'npm',
+            tool: 'npm',
             commands: ['npx create-next-app@latest'],
           },
           {
-            packageManager: 'pnpm',
+            tool: 'pnpm',
             commands: ['npx create-next-app@latest --use-pnpm'],
           },
           {
-            packageManager: 'yarn',
+            tool: 'yarn',
             commands: ['npx create-next-app@latest --use-yarn'],
           },
           {
-            packageManager: 'bun',
+            tool: 'bun',
             commands: ['npx create-next-app@latest --use-bun'],
           },
         ],
@@ -85,19 +85,19 @@ export const Everything: Record<string, Language> = {
         frameworks: ['React', 'Vue', 'Svelte', 'Lit', 'Solid', 'Qwik'],
         installers: [
           {
-            packageManager: 'npm',
+            tool: 'npm',
             commands: ['npm create vite@latest'],
           },
           {
-            packageManager: 'pnpm',
+            tool: 'pnpm',
             commands: ['pnpm create vite --template react-ts'],
           },
           {
-            packageManager: 'yarn',
+            tool: 'yarn',
             commands: ['yarn create vite --template react-ts'],
           },
           {
-            packageManager: 'bun',
+            tool: 'bun',
             commands: ['bun create vite --template react-ts'],
           },
         ],
@@ -120,19 +120,19 @@ export const Snacks: Record<string, Snack> = {
         name: MetaList.Vite,
         installers: [
           {
-            packageManager: 'npm',
+            tool: 'npm',
             commands: ['npm install tailwindcss @tailwindcss/vite'],
           },
           {
-            packageManager: 'pnpm',
+            tool: 'pnpm',
             commands: ['pnpm add tailwindcss @tailwindcss/vite'],
           },
           {
-            packageManager: 'yarn',
+            tool: 'yarn',
             commands: ['yarn add tailwindcss @tailwindcss/vite'],
           },
           {
-            packageManager: 'bun',
+            tool: 'bun',
             commands: ['bun add tailwindcss @tailwindcss/vite'],
           },
         ],
@@ -161,19 +161,19 @@ tailwindcss(),
         name: MetaList.Other,
         installers: [
           {
-            packageManager: 'npm',
+            tool: 'npm',
             commands: ['npm install tailwindcss', '@tailwindcss/postcss postcss'],
           },
           {
-            packageManager: 'pnpm',
+            tool: 'pnpm',
             commands: ['pnpm add tailwindcss', '@tailwindcss/postcss postcss'],
           },
           {
-            packageManager: 'yarn',
+            tool: 'yarn',
             commands: ['yarn add tailwindcss', '@tailwindcss/postcss postcss'],
           },
           {
-            packageManager: 'bun',
+            tool: 'bun',
             commands: ['bun add tailwindcss', '@tailwindcss/postcss postcss'],
           },
         ],
@@ -209,7 +209,7 @@ plugins: {
         name: MetaList.Vite,
         installers: [
           {
-            packageManager: 'npm',
+            tool: 'npm',
             commands: [
               'npx shadcn@latest init',
               'npm install -D @types/node',
@@ -217,7 +217,7 @@ plugins: {
             ],
           },
           {
-            packageManager: 'pnpm',
+            tool: 'pnpm',
             commands: [
               'pnpm dlx shadcn@latest init',
               'pnpm add -D @types/node',
@@ -225,7 +225,7 @@ plugins: {
             ],
           },
           {
-            packageManager: 'yarn',
+            tool: 'yarn',
             commands: [
               'npx shadcn@latest init',
               'yarn add -D @types/node',
@@ -233,7 +233,7 @@ plugins: {
             ],
           },
           {
-            packageManager: 'bun',
+            tool: 'bun',
             commands: [
               'bunx --bun shadcn@latest init',
               'bun add -D @types/node',
@@ -296,6 +296,247 @@ export default defineConfig({
     },
   },
 })
+            `,
+          },
+        ],
+      },
+    ],
+  },
+  LocalDockerDB: {
+    name: 'Local Docker DB',
+    description: 'A local Docker DB',
+    languages: ['Any'],
+    frameworks: ['Any'],
+    documentation: 'https://www.docker.com/products/docker-desktop/',
+    setup: [
+      {
+        name: 'PostgreSQL',
+        installers: [
+          {
+            tool: 'Docker',
+            commands: ['docker-compose up -d'],
+          },
+        ],
+        files: [
+          {
+            path: './Dockerfile',
+            content: `
+# Use the official PostgreSQL image as a base
+FROM postgres:15
+
+# Environment variables for database configuration
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=postgres
+ENV POSTGRES_DB=localdb
+
+# Optional: Set timezone
+ENV TZ=UTC
+
+# Copy initialization scripts
+COPY ./init-scripts/ /docker-entrypoint-initdb.d/
+
+# Expose PostgreSQL port
+EXPOSE 5432
+
+# Set the default command to run when starting the container
+CMD ["postgres"]
+            `,
+          },
+          {
+            path: './docker-compose.yml',
+            content: `
+version: '3.8'
+
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: local-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: localdb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+            `,
+          },
+        ],
+      },
+      {
+        name: 'MySQL',
+        installers: [
+          {
+            tool: 'Docker',
+            commands: ['docker-compose up -d'],
+          },
+        ],
+        files: [
+          {
+            path: './Dockerfile',
+            content: `
+# Use the official MySQL image as a base
+FROM mysql:8.0
+
+# Environment variables for database configuration
+ENV MYSQL_ROOT_PASSWORD=root
+ENV MYSQL_DATABASE=localdb
+
+# Optional: Set timezone
+ENV TZ=UTC
+
+# Copy initialization scripts
+COPY ./init-scripts/ /docker-entrypoint-initdb.d/
+
+# Expose MySQL port
+EXPOSE 3306
+
+# Set the default command to run when starting the container
+CMD ["mysqld"]
+            `,
+          },
+          {
+            path: './docker-compose.yml',
+            content: `
+version: '3.8'
+
+services:
+  mysql:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: local-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: localdb
+    volumes:
+      - mysql-data:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql-data:
+            `,
+          },
+        ],
+      },
+      {
+        name: 'SQLite',
+        files: [
+          {
+            path: './local.db',
+          },
+        ],
+      },
+    ],
+  },
+  Prettier: {
+    name: 'Prettier',
+    description: 'Prettier is an opinionated code formatter',
+    languages: ['Typescript'],
+    frameworks: ['React', 'Vue', 'Svelte', 'Lit', 'Solid', 'Qwik'],
+    documentation: 'https://prettier.io/docs',
+    setup: [
+      {
+        name: MetaList.Any,
+        installers: [
+          {
+            tool: 'npm',
+            commands: [
+              'npm install --save-dev --save-exact prettier',
+              'npm install --save-dev @trivago/prettier-plugin-sort-imports',
+            ],
+          },
+          {
+            tool: 'pnpm',
+            commands: [
+              'pnpm add --save-dev --save-exact prettier',
+              'pnpm add --save-dev @trivago/prettier-plugin-sort-imports',
+            ],
+          },
+          {
+            tool: 'yarn',
+            commands: [
+              'yarn add --dev --exact prettier',
+              'yarn add --dev @trivago/prettier-plugin-sort-imports',
+            ],
+          },
+          {
+            tool: 'bun',
+            commands: [
+              'bun add --dev --exact prettier',
+              'bun add --dev @trivago/prettier-plugin-sort-imports',
+            ],
+          },
+        ],
+        files: [
+          {
+            path: '.prettierrc',
+            content: `
+"semi": true,
+"singleQuote": false,
+"tabWidth": 2,
+"trailingComma": "es5",
+"importOrder": [
+  "^(react|next?/?([a-zA-Z/]*))$",
+  "<THIRD_PARTY_MODULES>",
+  "^@/(.*)$",
+  "^[./]"
+],
+"importOrderSeparation": true,
+"importOrderSortSpecifiers": true,
+"plugins": [
+  "@trivago/prettier-plugin-sort-imports",
+  "prettier-plugin-tailwindcss"
+]
+            `,
+          },
+        ],
+      },
+    ],
+  },
+  VSCodeSettings: {
+    name: 'VSCode Settings',
+    description: 'VSCode Settings',
+    languages: ['Typescript'],
+    frameworks: ['React', 'Vue', 'Svelte', 'Lit', 'Solid', 'Qwik'],
+    documentation: 'https://code.visualstudio.com/docs',
+    setup: [
+      {
+        name: MetaList.Any,
+        files: [
+          {
+            path: '.vscode/settings.json',
+            content: `
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "always",
+    "source.organizeImports": "always"
+  },
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib"
+}
             `,
           },
         ],

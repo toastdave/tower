@@ -32,7 +32,7 @@ export default async function handleShadCN(
       }
 
       // Get installer commands
-      const installer = viteSetup.installers.find((i) => i.packageManager === packageManager);
+      const installer = viteSetup.installers?.find((i) => i.tool === packageManager);
       if (!installer) {
         throw new Error(`No installer found for package manager: ${packageManager}`);
       }

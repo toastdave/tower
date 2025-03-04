@@ -96,7 +96,7 @@ const createProject = async (
             (t: { name: string }) => t.name === 'Next.js'
           );
           const nextInstaller = nextConfig?.installers?.find(
-            (i: { packageManager: string }) => i.packageManager === packageManager
+            (i: { tool: string }) => i.tool === packageManager
           );
           if (nextInstaller) {
             for (const command of nextInstaller.commands) {
@@ -109,7 +109,7 @@ const createProject = async (
             (t: { name: string }) => t.name === 'Vite'
           );
           const viteInstaller = viteConfig?.installers?.find(
-            (i: { packageManager: string }) => i.packageManager === packageManager
+            (i: { tool: string }) => i.tool === packageManager
           );
           if (viteInstaller) {
             for (const command of viteInstaller.commands) {

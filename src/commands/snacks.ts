@@ -3,8 +3,11 @@ import { Command } from 'commander';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { SetupOption, Snacks } from '../everything.js';
+import handleLocalDockerDB from '../paths/snacks/localdockerdb.js';
+import handlePrettier from '../paths/snacks/prettier.js';
 import handleShadCN from '../paths/snacks/shadcn.js';
 import handleTailwind from '../paths/snacks/tailwind.js';
+import handleVSCodeSettings from '../paths/snacks/vscode.js';
 // Import other handlers as needed
 
 async function detectFrameworkAndPackageManager(): Promise<{
@@ -81,28 +84,30 @@ export const snacks = new Command()
     const snacksDir = path.join(process.cwd(), 'snacks');
     await fs.mkdir(snacksDir, { recursive: true });
 
-    // Create a central commands.txt file
+    // Create a central commands.txt file if it doesn't exist
     const commandsFilePath = path.join(snacksDir, 'commands.txt');
-    // Initialize with empty content or create if doesn't exist
-    await fs.writeFile(commandsFilePath, '', 'utf8');
+    try {
+      await fs.access(commandsFilePath);
+      // File exists, don't overwrite it
+    } catch (error) {
+      // File doesn't exist, create it with empty content
+      await fs.writeFile(commandsFilePath, '', 'utf8');
+    }
 
     // Process each selected snack
     for (const snackName of selectedSnacks as string[]) {
       try {
         // Use a handler registry to map snack names to their handlers
-        const handlerRegistry: {
-          [key: string]: (
-            packageManager: string,
-            snacksDir: string,
-            commandsFilePath: string
-          ) => Promise<void>;
-        } = {
+        const handlerRegistry = {
           'Tailwind CSS': handleTailwind,
           'Shadcn UI': handleShadCN,
+          'Local Docker DB': handleLocalDockerDB,
+          Prettier: handlePrettier,
+          'VSCode Settings': handleVSCodeSettings,
           // Add other handlers here
         };
 
-        const handler = handlerRegistry[snackName];
+        const handler = handlerRegistry[snackName as keyof typeof handlerRegistry];
 
         if (handler) {
           // Use the specialized handler
@@ -118,7 +123,11 @@ export const snacks = new Command()
       }
     }
 
+    // After processing all snacks, generate the docs.txt file
+    await generateDocsFile(selectedSnacks as string[], snacksDir);
+
     p.note(`All required commands have been listed in ${commandsFilePath}`);
+    p.note(`Documentation links have been listed in ${path.join(snacksDir, 'docs.txt')}`);
     p.outro('All selected snacks have been prepared in the snacks directory!');
   });
 
@@ -147,7 +156,7 @@ async function handleGenericSnack(
   }
 
   // Get installer for the current package manager
-  const installer = setupToUse.installers.find((i) => i.packageManager === packageManager);
+  const installer = setupToUse.installers?.find((i) => i.tool === packageManager);
   if (!installer) {
     throw new Error(`No installer found for package manager: ${packageManager}`);
   }
@@ -197,9 +206,31 @@ export async function addCommandsToFile(
 
 export async function writeExampleFiles(setup: SetupOption, snackDir: string) {
   // Write all example files to the snack directory
-  for (const file of setup.files) {
+  for (const file of setup.files ?? []) {
     const filePath = path.join(snackDir, path.basename(file.path));
     // Trim the content to remove extra blank lines at beginning and end
-    await fs.writeFile(filePath, file.content.trim(), 'utf8');
+    await fs.writeFile(filePath, file.content?.trim() ?? '', 'utf8');
+  }
+}
+
+// Function to generate docs.txt with documentation links
+async function generateDocsFile(selectedSnacks: string[], snacksDir: string) {
+  try {
+    const docsFilePath = path.join(snacksDir, 'docs.txt');
+    let docsContent = '# Documentation Links\n\n';
+
+    for (const snackName of selectedSnacks) {
+      // Find the snack configuration
+      const snackConfig = Object.values(Snacks).find((snack) => snack.name === snackName);
+
+      if (snackConfig && snackConfig.documentation) {
+        docsContent += `## ${snackName}\n${snackConfig.documentation}\n\n`;
+      }
+    }
+
+    // Write the docs.txt file
+    await fs.writeFile(docsFilePath, docsContent.trim(), 'utf8');
+  } catch (error) {
+    p.note(`Failed to generate docs.txt: ${error}`);
   }
 }

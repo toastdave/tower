@@ -32,7 +32,7 @@ export default async function handleTailwind(
       }
 
       // Get installer commands
-      const installer = viteSetup.installers.find((i) => i.packageManager === packageManager);
+      const installer = viteSetup.installers?.find((i) => i.tool === packageManager);
       if (!installer) {
         throw new Error(`No installer found for package manager: ${packageManager}`);
       }
@@ -51,7 +51,7 @@ export default async function handleTailwind(
       }
 
       // Get installer commands
-      const installer = postcssSetup.installers.find((i) => i.packageManager === packageManager);
+      const installer = postcssSetup.installers?.find((i) => i.tool === packageManager);
       if (!installer) {
         throw new Error(`No installer found for package manager: ${packageManager}`);
       }
