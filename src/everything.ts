@@ -304,7 +304,7 @@ export default defineConfig({
   },
   LocalDockerDB: {
     name: 'Local Docker DB',
-    description: 'A local Docker DB',
+    description: 'A local Docker database for development',
     languages: ['Any'],
     frameworks: ['Any'],
     documentation: 'https://www.docker.com/products/docker-desktop/',
@@ -319,39 +319,12 @@ export default defineConfig({
         ],
         files: [
           {
-            path: './Dockerfile',
-            content: `
-# Use the official PostgreSQL image as a base
-FROM postgres:15
-
-# Environment variables for database configuration
-ENV POSTGRES_USER=postgres
-ENV POSTGRES_PASSWORD=postgres
-ENV POSTGRES_DB=localdb
-
-# Optional: Set timezone
-ENV TZ=UTC
-
-# Copy initialization scripts
-COPY ./init-scripts/ /docker-entrypoint-initdb.d/
-
-# Expose PostgreSQL port
-EXPOSE 5432
-
-# Set the default command to run when starting the container
-CMD ["postgres"]
-            `,
-          },
-          {
-            path: './docker-compose.yml',
-            content: `
-version: '3.8'
+            path: 'docker-compose.yml',
+            content: `version: '3.8'
 
 services:
   postgres:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: postgres:15
     container_name: local-postgres
     ports:
       - "5432:5432"
@@ -361,7 +334,6 @@ services:
       POSTGRES_DB: localdb
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./init-scripts:/docker-entrypoint-initdb.d
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -370,8 +342,7 @@ services:
       retries: 5
 
 volumes:
-  postgres-data:
-            `,
+  postgres-data:`,
           },
         ],
       },
@@ -385,38 +356,12 @@ volumes:
         ],
         files: [
           {
-            path: './Dockerfile',
-            content: `
-# Use the official MySQL image as a base
-FROM mysql:8.0
-
-# Environment variables for database configuration
-ENV MYSQL_ROOT_PASSWORD=root
-ENV MYSQL_DATABASE=localdb
-
-# Optional: Set timezone
-ENV TZ=UTC
-
-# Copy initialization scripts
-COPY ./init-scripts/ /docker-entrypoint-initdb.d/
-
-# Expose MySQL port
-EXPOSE 3306
-
-# Set the default command to run when starting the container
-CMD ["mysqld"]
-            `,
-          },
-          {
-            path: './docker-compose.yml',
-            content: `
-version: '3.8'
+            path: 'docker-compose.yml',
+            content: `version: '3.8'
 
 services:
   mysql:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: mysql:8.0
     container_name: local-mysql
     ports:
       - "3306:3306"
@@ -427,14 +372,13 @@ services:
       - mysql-data:/var/lib/mysql
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$MYSQL_ROOT_PASSWORD"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -proot"]
       interval: 10s
       timeout: 5s
       retries: 5
 
 volumes:
-  mysql-data:
-            `,
+  mysql-data:`,
           },
         ],
       },
@@ -442,7 +386,7 @@ volumes:
         name: 'SQLite',
         files: [
           {
-            path: './local.db',
+            path: 'local.db',
           },
         ],
       },

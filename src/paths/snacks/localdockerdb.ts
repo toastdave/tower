@@ -1,7 +1,7 @@
 import * as p from '@clack/prompts';
 import * as fs from 'fs/promises';
 import path from 'path';
-import { addCommandsToFile, writeExampleFiles } from '../../commands/snacks.js';
+import { addCommandsToFile } from '../../commands/snacks.js';
 import { Snacks } from '../../everything.js';
 
 export default async function handleLocalDockerDB(
@@ -41,6 +41,10 @@ export default async function handleLocalDockerDB(
       throw new Error(`Setup for ${selectedDB} not found`);
     }
 
+    // Create a database-specific directory
+    const specificDbDir = path.join(dbDir, (selectedDB as string).toLowerCase());
+    await fs.mkdir(specificDbDir, { recursive: true });
+
     // Get installer commands if available
     if (selectedSetup.installers && selectedSetup.installers.length > 0) {
       // Find Docker installer (since these are Docker databases)
@@ -54,10 +58,22 @@ export default async function handleLocalDockerDB(
       }
     }
 
-    // Write example files
-    await writeExampleFiles(selectedSetup, dbDir);
+    // Write example files to the database-specific directory
+    if (selectedSetup.files) {
+      for (const file of selectedSetup.files) {
+        const filePath = path.join(specificDbDir, file.path);
 
-    p.note(`Local ${selectedDB} database files prepared in ${dbDir}`);
+        // Write file content
+        if (file.content) {
+          await fs.writeFile(filePath, file.content.trim(), 'utf8');
+        } else {
+          // For files without content (like SQLite's local.db), create an empty file
+          await fs.writeFile(filePath, '', 'utf8');
+        }
+      }
+    }
+
+    p.note(`Local ${selectedDB} database files prepared in ${specificDbDir}`);
 
     // Additional instructions based on the selected database
     switch (selectedDB) {
@@ -65,7 +81,7 @@ export default async function handleLocalDockerDB(
       case 'MySQL':
         p.note(`
 To start your ${selectedDB} database:
-1. Navigate to the ${dbDir} directory
+1. Navigate to the ${specificDbDir} directory
 2. Run 'docker-compose up -d'
 3. Connect to your database using:
    - Host: localhost
@@ -77,7 +93,7 @@ To start your ${selectedDB} database:
         break;
       case 'SQLite':
         p.note(`
-Your SQLite database file has been created at ${path.join(dbDir, 'local.db')}
+Your SQLite database file has been created at ${path.join(specificDbDir, 'local.db')}
 You can connect to it directly using any SQLite client.
         `);
         break;
