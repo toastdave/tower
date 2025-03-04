@@ -107,8 +107,8 @@ export const Everything: Record<string, Language> = {
   },
 };
 
-export const Snacks: Snack[] = [
-  {
+export const Snacks: Record<string, Snack> = {
+  TailwindCSS: {
     name: 'Tailwind CSS',
     description:
       'A utility-first CSS framework packed with classes like flex, pt-4, text-center and rotate-90 that can be composed to build any design, directly in your markup.',
@@ -198,7 +198,7 @@ plugins: {
       },
     ],
   },
-  {
+  ShadcnUI: {
     name: 'Shadcn UI',
     description: 'Build complex React apps with ease',
     languages: ['Typescript'],
@@ -302,4 +302,4 @@ export default defineConfig({
       },
     ],
   },
-];
+};

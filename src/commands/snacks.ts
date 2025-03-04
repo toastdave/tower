@@ -2,62 +2,10 @@ import * as p from '@clack/prompts';
 import { Command } from 'commander';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { Snacks } from '../everything.js';
+import { SetupOption, Snacks } from '../everything.js';
 import handleShadCN from '../paths/snacks/shadcn.js';
 import handleTailwind from '../paths/snacks/tailwind.js';
-
-// type Tool = {
-//   name: string;
-//   value: string;
-//   description: string;
-//   frameworks?: string[];
-// };
-
-// const tools: Tool[] = [
-//   {
-//     name: 'Tailwind CSS',
-//     value: 'tailwind',
-//     description: 'A utility-first CSS framework',
-//     frameworks: ['react', 'vue', 'svelte', 'astro', 'solid', 'next'],
-//   },
-//   {
-//     name: 'shadcn/ui',
-//     value: 'shadcn',
-//     description: 'Re-usable components built with Radix UI and Tailwind',
-//     frameworks: ['react', 'next'],
-//   },
-//   {
-//     name: 'Drizzle ORM',
-//     value: 'drizzle',
-//     description: 'TypeScript ORM with edge-runtime compatibility',
-//   },
-//   {
-//     name: 'SQLite + LibSQL',
-//     value: 'libsql',
-//     description: 'Local SQLite database with LibSQL extensions',
-//   },
-//   {
-//     name: 'PostgreSQL Docker',
-//     value: 'postgres-docker',
-//     description: 'PostgreSQL database in Docker container',
-//   },
-//   {
-//     name: 'MySQL Docker',
-//     value: 'mysql-docker',
-//     description: 'MySQL database in Docker container',
-//   },
-//   {
-//     name: 'Prisma',
-//     value: 'prisma',
-//     description: 'Next-generation ORM for Node.js and TypeScript',
-//   },
-//   {
-//     name: 'tRPC',
-//     value: 'trpc',
-//     description: 'End-to-end typesafe APIs made easy',
-//     frameworks: ['react', 'next'],
-//   },
-// ];
+// Import other handlers as needed
 
 async function detectFrameworkAndPackageManager(): Promise<{
   framework: string | null;
@@ -108,121 +56,23 @@ export const snacks = new Command()
 
     // Detect current project setup
     const detected = await detectFrameworkAndPackageManager();
+    const { packageManager } = detected;
 
-    let framework: string;
-    if (detected.framework) {
-      const confirmFramework = await p.confirm({
-        message: `Detected ${detected.framework} project. Is this correct?`,
-      });
-
-      if (p.isCancel(confirmFramework)) {
-        p.cancel('Operation cancelled');
-        process.exit(0);
-      }
-
-      if (!confirmFramework) {
-        const selectedFramework = await p.select({
-          message: 'What framework are you using?',
-          options: [
-            { label: 'React', value: 'react' },
-            { label: 'Next.js', value: 'next' },
-            { label: 'Vue', value: 'vue' },
-            { label: 'Svelte', value: 'svelte' },
-            { label: 'Astro', value: 'astro' },
-            { label: 'Solid', value: 'solid' },
-          ],
-        });
-
-        if (p.isCancel(selectedFramework)) {
-          p.cancel('Operation cancelled');
-          process.exit(0);
-        }
-        framework = selectedFramework as string;
-      } else {
-        framework = detected.framework;
-      }
-    } else {
-      const selectedFramework = await p.select({
-        message: 'Could not detect framework. Please select:',
-        options: [
-          { label: 'React', value: 'react' },
-          { label: 'Next.js', value: 'next' },
-          { label: 'Vue', value: 'vue' },
-          { label: 'Svelte', value: 'svelte' },
-          { label: 'Astro', value: 'astro' },
-          { label: 'Solid', value: 'solid' },
-        ],
-      });
-
-      if (p.isCancel(selectedFramework)) {
-        p.cancel('Operation cancelled');
-        process.exit(0);
-      }
-      framework = selectedFramework as string;
+    if (!packageManager) {
+      p.cancel('No package manager detected');
+      process.exit(0);
     }
 
-    let packageManager: string;
-    if (detected.packageManager) {
-      const confirmPM = await p.confirm({
-        message: `Detected ${detected.packageManager}. Is this correct?`,
-      });
-
-      if (p.isCancel(confirmPM)) {
-        p.cancel('Operation cancelled');
-        process.exit(0);
-      }
-
-      if (!confirmPM) {
-        const selectedPM = await p.select({
-          message: 'Which package manager are you using?',
-          options: [
-            { label: 'npm', value: 'npm' },
-            { label: 'pnpm', value: 'pnpm' },
-            { label: 'yarn', value: 'yarn' },
-            { label: 'bun', value: 'bun' },
-          ],
-        });
-
-        if (p.isCancel(selectedPM)) {
-          p.cancel('Operation cancelled');
-          process.exit(0);
-        }
-        packageManager = selectedPM as string;
-      } else {
-        packageManager = detected.packageManager;
-      }
-    } else {
-      const selectedPM = await p.select({
-        message: 'Could not detect package manager. Please select:',
-        options: [
-          { label: 'npm', value: 'npm' },
-          { label: 'pnpm', value: 'pnpm' },
-          { label: 'yarn', value: 'yarn' },
-          { label: 'bun', value: 'bun' },
-        ],
-      });
-
-      if (p.isCancel(selectedPM)) {
-        p.cancel('Operation cancelled');
-        process.exit(0);
-      }
-      packageManager = selectedPM as string;
-    }
-
-    // const compatibleTools = tools.filter(
-    //   (tool) => !tool.frameworks || tool.frameworks.includes(framework as string)
-    // );
-
-    const snacks = await p.multiselect({
+    const selectedSnacks = await p.multiselect({
       message: 'Select snacks to add to your project:',
-      options: Snacks.map((snack) => ({
-        label: snack.name,
-        value: snack.name,
-        hint: snack.description,
+      options: Object.keys(Snacks).map((key) => ({
+        label: Snacks[key].name,
+        value: Snacks[key].name,
+        hint: Snacks[key].description,
       })),
     });
 
-    if (p.isCancel(snacks)) {
+    if (p.isCancel(selectedSnacks)) {
       p.cancel('Operation cancelled');
       process.exit(0);
     }
@@ -236,22 +86,120 @@ export const snacks = new Command()
     // Initialize with empty content or create if doesn't exist
     await fs.writeFile(commandsFilePath, '', 'utf8');
 
-    for (const snack of snacks as string[]) {
+    // Process each selected snack
+    for (const snackName of selectedSnacks as string[]) {
       try {
-        switch (snack) {
-          case 'Tailwind CSS':
-            await handleTailwind(packageManager, snacksDir, commandsFilePath);
-            break;
-          case 'Shadcn UI':
-            await handleShadCN(packageManager, snacksDir, commandsFilePath);
-            break;
+        // Use a handler registry to map snack names to their handlers
+        const handlerRegistry: {
+          [key: string]: (
+            packageManager: string,
+            snacksDir: string,
+            commandsFilePath: string
+          ) => Promise<void>;
+        } = {
+          'Tailwind CSS': handleTailwind,
+          'Shadcn UI': handleShadCN,
+          // Add other handlers here
+        };
+
+        const handler = handlerRegistry[snackName];
+
+        if (handler) {
+          // Use the specialized handler
+          await handler(packageManager, snacksDir, commandsFilePath);
+        } else {
+          // Fallback to generic handling for simple snacks
+          await handleGenericSnack(snackName, packageManager, snacksDir, commandsFilePath);
         }
-        p.note(`✓ Successfully prepared ${snack}`);
+
+        p.note(`✓ Successfully prepared ${snackName}`);
       } catch (error) {
-        p.note(`Failed to prepare ${snack}: ${error}`);
+        p.note(`Failed to prepare ${snackName}: ${error}`);
       }
     }
 
     p.note(`All required commands have been listed in ${commandsFilePath}`);
     p.outro('All selected snacks have been prepared in the snacks directory!');
   });
+
+// Generic handler for simple snacks that don't need complex setup logic
+async function handleGenericSnack(
+  snackName: string,
+  packageManager: string,
+  snacksDir: string,
+  commandsFilePath: string
+) {
+  const snackConfig = Object.values(Snacks).find((snack) => snack.name === snackName);
+
+  if (!snackConfig) {
+    throw new Error(`Snack configuration not found for: ${snackName}`);
+  }
+
+  // Create directory for this snack
+  const snackDir = path.join(snacksDir, snackName.toLowerCase().replace(/\s+/g, '-'));
+  await fs.mkdir(snackDir, { recursive: true });
+
+  // Use the first available setup (for simple snacks)
+  const setupToUse = snackConfig.setup[0];
+
+  if (!setupToUse) {
+    throw new Error(`No setup found for ${snackName}`);
+  }
+
+  // Get installer for the current package manager
+  const installer = setupToUse.installers.find((i) => i.packageManager === packageManager);
+  if (!installer) {
+    throw new Error(`No installer found for package manager: ${packageManager}`);
+  }
+
+  // Add commands to the central commands file
+  await addCommandsToFile(installer.commands, commandsFilePath, snackName);
+
+  // Write example files
+  await writeExampleFiles(setupToUse, snackDir);
+}
+
+// Export these helper functions so they can be used by individual handlers
+export async function addCommandsToFile(
+  commands: string[],
+  commandsFilePath: string,
+  snackName: string
+) {
+  if (commands.length === 0) return;
+
+  // Read existing content
+  let existingContent = '';
+  try {
+    existingContent = await fs.readFile(commandsFilePath, 'utf8');
+  } catch (error) {
+    // File might not exist yet, that's okay
+  }
+
+  // Check if this snack's commands are already in the file
+  if (existingContent.includes(`# ${snackName}`)) {
+    // This snack's commands are already in the file, no need to add them again
+    return;
+  }
+
+  // Format the new content to add
+  let newContent;
+  if (existingContent.trim().length === 0) {
+    // First entry - no leading newlines
+    newContent = `# ${snackName}\n${commands.join('\n')}`;
+  } else {
+    // Subsequent entries - add exactly one blank line before
+    newContent = `${existingContent.trim()}\n\n# ${snackName}\n${commands.join('\n')}`;
+  }
+
+  // Write back to the central commands file
+  await fs.writeFile(commandsFilePath, newContent, 'utf8');
+}
+
+export async function writeExampleFiles(setup: SetupOption, snackDir: string) {
+  // Write all example files to the snack directory
+  for (const file of setup.files) {
+    const filePath = path.join(snackDir, path.basename(file.path));
+    // Trim the content to remove extra blank lines at beginning and end
+    await fs.writeFile(filePath, file.content.trim(), 'utf8');
+  }
+}
